@@ -13,6 +13,7 @@ const int nImageCompressionPercent = 85;
 char* window_name = "copyMakeBorder Demo";
 std::string sCopyRight = "created by domainname.com";
 std::string sWaterMark = "domainname.com";
+std::string sTitle = "Gravity & Lights: Lecture 2: Hyperplane";
 int intFontFace = CV_FONT_HERSHEY_SIMPLEX;
 int textPointX;
 int textPointY;
@@ -82,12 +83,28 @@ int main(void)
 		int borderType = cv::BORDER_CONSTANT;
 		cv::copyMakeBorder(imgFrameSrc, imgFrameDes, top, bottom, left, right, borderType, value);
 		
-		//Put Copy Right Text.
-		textPointX = (int)(imgFrameDes.cols-300); 
-		textPointY = (int)(imgFrameDes.rows-20);
-		cv::putText(imgFrameDes, sCopyRight,
+		//Put Introduction Text.
+		textPointX = (int)(30);
+		textPointY = (int)(30);
+		cv::putText(imgFrameDes, sTitle,
+			cv::Point(textPointX, textPointY), intFontFace, 0.5,
+			cv::Scalar(0, 0, 0), 1);
+
+		//Put Page number Text.
+		textPointX = (int)(imgFrameDes.cols-100); 
+		textPointY = (int)(30);
+		std::string sPageNo = "page " + std::to_string(nPageNo);
+		cv::putText(imgFrameDes, sPageNo,
 			cv::Point(textPointX, textPointY), intFontFace, 0.5, 
 			cv::Scalar(0, 0, 0), 1);
+
+		//Put Copy Right Text.
+		textPointX = (int)(imgFrameDes.cols - 300);
+		textPointY = (int)(imgFrameDes.rows - 20);
+		cv::putText(imgFrameDes, sCopyRight,
+			cv::Point(textPointX, textPointY), intFontFace, 0.5,
+			cv::Scalar(0, 0, 0), 1);
+
 		cv::imshow(window_name, imgFrameDes);
 
 		//Write final image with some compression
