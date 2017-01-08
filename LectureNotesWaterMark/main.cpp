@@ -12,21 +12,17 @@
 const int nImageCompressionPercent = 85;
 char* window_name = "copyMakeBorder Demo";
 std::string sCopyRight = "created by domainname.com";
-/*
-cv::Mat src, dst;
-int top, bottom, left, right;
-int borderType;
-cv::Scalar value;
+std::string sWaterMark = "domainname.com";
+int intFontFace = CV_FONT_HERSHEY_SIMPLEX;
+int textPointX;
+int textPointY;
+int nPageNo = 1;
 
-cv::RNG rng(12345);
-*/
-/** @function main  */
 int main(void)
 {
 	cv::namedWindow(window_name, CV_WINDOW_AUTOSIZE);
 
 	std::string finalImageStr = "../../tmpP/finalImage.pdf";
-//	std::string finalImageStr = "C:\\Users\\atishks\\Documents\\Visual Studio 2015\\Projects\\tmpP\\finalImage.pdf";
 	std::list<Magick::Image> imageList;
 
 	Magick::readImages(&imageList, finalImageStr);
@@ -41,6 +37,42 @@ int main(void)
 		cv::Mat imgFrameSrc = cv::imread(finalImageStrI);
 		cv::imshow(finalImageStrI, imgFrameSrc);
 
+		//Create a watermark
+		cv::Mat imgFrameWM = cv::Mat::zeros(imgFrameSrc.rows, 
+			imgFrameSrc.cols, imgFrameSrc.type());
+		textPointX = (int)(imgFrameWM.cols/2);
+		textPointY = (int)(imgFrameWM.rows - 200);
+		cv::putText(imgFrameWM, sWaterMark,
+			cv::Point(textPointX, textPointY), intFontFace, 2,
+			cv::Scalar(255, 255, 255), 8);
+		cv::imshow("watermark", imgFrameWM);
+
+		//Blend watermark to original.
+		for (int i = 0; i < imgFrameWM.rows; i++) {
+			for (int j = 0; j < imgFrameWM.cols; j++) {
+				cv::Vec3b intensity2 = imgFrameWM.at<cv::Vec3b>(i, j);
+				double intensity = intensity2.val[0];
+				if (intensity == 255) {
+					cv::Vec3b intensitySrc = imgFrameSrc.at<cv::Vec3b>(i, j);
+					if(intensitySrc.val[0] >= 5)
+						imgFrameSrc.at<cv::Vec3b>(i, j)[0] = intensitySrc.val[0] - 5;
+					else 
+						imgFrameSrc.at<cv::Vec3b>(i, j)[0] = intensitySrc.val[0] + 5;
+					if(intensitySrc.val[1] >= 5)
+						imgFrameSrc.at<cv::Vec3b>(i, j)[1] = intensitySrc.val[1] - 5;
+					else 
+						imgFrameSrc.at<cv::Vec3b>(i, j)[1] = intensitySrc.val[1] + 5;
+					if(intensitySrc.val[2] >= 5)
+						imgFrameSrc.at<cv::Vec3b>(i, j)[2] = intensitySrc.val[2] - 5;
+					else 
+						imgFrameSrc.at<cv::Vec3b>(i, j)[2] = intensitySrc.val[2] + 5;
+				}
+			}
+		}
+		cv::imshow("After Blending", imgFrameSrc);
+
+
+		//Make top and bottom BORDER
 		int top, bottom, left, right;
 		/// Initialize arguments for the filter
 		top = 50; bottom = 50;
@@ -50,14 +82,15 @@ int main(void)
 		int borderType = cv::BORDER_CONSTANT;
 		cv::copyMakeBorder(imgFrameSrc, imgFrameDes, top, bottom, left, right, borderType, value);
 		
-		int intFontFace = CV_FONT_HERSHEY_SIMPLEX;
-		int textPointX = (int)(imgFrameDes.cols-300); 
-		int textPointY = (int)(imgFrameDes.rows-20);
+		//Put Copy Right Text.
+		textPointX = (int)(imgFrameDes.cols-300); 
+		textPointY = (int)(imgFrameDes.rows-20);
 		cv::putText(imgFrameDes, sCopyRight,
 			cv::Point(textPointX, textPointY), intFontFace, 0.5, 
 			cv::Scalar(0, 0, 0), 1);
 		cv::imshow(window_name, imgFrameDes);
 
+		//Write final image with some compression
 		std::vector<int> params;
 		if (nImageCompressionPercent > 0) {
 			params.push_back(CV_IMWRITE_JPEG_QUALITY);
@@ -66,6 +99,8 @@ int main(void)
 		cv::imwrite(finalImageStrI2, imgFrameDes, params);
 
 		Magick::readImages(&imageListW, finalImageStrI2);
+
+		nPageNo++;
 	}
 
 	std::string finalImageStrF = "../../tmpP/FinalImageF.pdf";
