@@ -4,11 +4,13 @@
 #include<opencv2/highgui/highgui.hpp>
 #include<opencv2/imgproc/imgproc.hpp>
 
+#include <fstream>
 #include<iostream>
 #include<conio.h>           // it may be necessary to change or remove this line if not using Windows
 #include "Magick++.h"
 
 /// Global Variables
+std::string sVideoPath;
 const int nImageCompressionPercent = 85;
 char* window_name = "copyMakeBorder Demo";
 std::string sCopyRight = "created by domainname.com";
@@ -21,22 +23,26 @@ int nPageNo = 1;
 
 int main(void)
 {
+	sVideoPath = "../../mod03lec10";
+	std::ifstream inFile(sVideoPath + "_frame.list");
+	std::string sFrameName;
+
 	cv::namedWindow(window_name, CV_WINDOW_AUTOSIZE);
 
 	std::string finalImageStr = "../../tmpP/finalImage.pdf";
-	std::list<Magick::Image> imageList;
+	//std::list<Magick::Image> imageList;
 
-	Magick::readImages(&imageList, finalImageStr);
+	//Magick::readImages(&imageList, finalImageStr);
 
 	std::list<Magick::Image> imageListW;
 
-	std::string finalImageStrI = "../../tmpW/intermedia1.jpg";
 	std::string finalImageStrI2 = "../../tmpW/intermedia2.jpg";
-	for (std::list<Magick::Image>::iterator it = imageList.begin(); it != imageList.end(); ++it) {
+	while(inFile >> sFrameName) {
+		std::cout << sFrameName;
 		std::cout << "Writing intermediate image\n";
-		(*it).write(finalImageStrI);
-		cv::Mat imgFrameSrc = cv::imread(finalImageStrI);
-		cv::imshow(finalImageStrI, imgFrameSrc);
+		sFrameName = "../" + sFrameName; //This line is just temporary.
+		cv::Mat imgFrameSrc = cv::imread(sFrameName);
+		cv::imshow("origImage", imgFrameSrc);
 
 		//Create a watermark
 		cv::Mat imgFrameWM = cv::Mat::zeros(imgFrameSrc.rows, 
@@ -123,6 +129,7 @@ int main(void)
 	std::string finalImageStrF = "../../tmpP/FinalImageF.pdf";
 	Magick::writeImages(imageListW.begin(), imageListW.end(), finalImageStrF);
 
+	inFile.close();
 	cv::waitKey(0);
 
 	return 0;
