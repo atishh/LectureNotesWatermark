@@ -20,6 +20,9 @@ int intFontFace = CV_FONT_HERSHEY_SIMPLEX;
 int textPointX;
 int textPointY;
 int nPageNo = 1;
+bool bIsThumbNailWritten = false;
+const int nThumbNailWidth = 300;
+const int nThumbNailHeight = 200;
 
 int main(void)
 {
@@ -120,6 +123,17 @@ int main(void)
 			params.push_back(nImageCompressionPercent);   // that's percent, so 100 == no compression, 1 == full 
 		}
 		cv::imwrite(finalImageStrI2, imgFrameDes, params);
+
+		if (bIsThumbNailWritten == false) {
+			//First image is written as smaller thumbnail.
+			std::string sThumbNail = sVideoPath + "_thumbnail.jpg";
+			cv::Mat imgFrameTN = cv::Mat::zeros(nThumbNailHeight, 
+				nThumbNailWidth, imgFrameDes.type());
+			resize(imgFrameDes, imgFrameTN, imgFrameTN.size());
+			cv::imshow("thumbnail", imgFrameTN);
+			cv::imwrite(sThumbNail, imgFrameTN, params);
+			bIsThumbNailWritten = true;
+		}
 
 		Magick::readImages(&imageListW, finalImageStrI2);
 
