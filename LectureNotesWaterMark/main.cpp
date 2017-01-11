@@ -23,10 +23,12 @@ int nPageNo = 1;
 bool bIsThumbNailWritten = false;
 const int nThumbNailWidth = 300;
 const int nThumbNailHeight = 200;
+const bool bEnableSharpening = true; //Aha moment
 
 int main(void)
 {
-	sVideoPath = "../../mod03lec10";
+	//sVideoPath = "../../g1USSZVWDsY";
+	sVideoPath = "../../Lecture14";
 	std::ifstream inFile(sVideoPath + "_frame.list");
 	std::string sFrameName;
 
@@ -46,6 +48,13 @@ int main(void)
 		sFrameName = "../" + sFrameName; //This line is just temporary.
 		cv::Mat imgFrameSrc = cv::imread(sFrameName);
 		cv::imshow("origImage", imgFrameSrc);
+
+		//Sharpen image
+		if (bEnableSharpening) {
+			cv::Mat imgFrameInput = imgFrameSrc.clone();
+			cv::GaussianBlur(imgFrameInput, imgFrameSrc, cv::Size(0, 0), 3);
+			cv::addWeighted(imgFrameInput, 1.5, imgFrameSrc, -0.5, 0, imgFrameSrc);
+		}
 
 		//Create a watermark
 		cv::Mat imgFrameWM = cv::Mat::zeros(imgFrameSrc.rows, 
