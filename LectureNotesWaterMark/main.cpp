@@ -27,8 +27,8 @@ const bool bEnableSharpening = true; //Aha moment
 
 int main(void)
 {
-	//sVideoPath = "../../g1USSZVWDsY";
-	sVideoPath = "../../Lecture14";
+	sVideoPath = "../../g1USSZVWDsY";
+	//sVideoPath = "../../Lecture14";
 	std::ifstream inFile(sVideoPath + "_frame.list");
 	std::string sFrameName;
 
@@ -54,6 +54,16 @@ int main(void)
 			cv::Mat imgFrameInput = imgFrameSrc.clone();
 			cv::GaussianBlur(imgFrameInput, imgFrameSrc, cv::Size(0, 0), 3);
 			cv::addWeighted(imgFrameInput, 1.5, imgFrameSrc, -0.5, 0, imgFrameSrc);
+			//cv::Mat_<float> mykernel(3, 3);
+			//mykernel << -1, -1, -1, -1, 9, -1, -1, -1, -1;
+			//mykernel << 1, 1, 1, 1, -7, 1, 1, 1, 1;
+			//cv::Mat_<float> mykernel(5, 5);
+			//mykernel << -1, -1, -1, -1, -1, -1, 2, 2, 2, -1, -1, 2, 8, 2, -1,
+			//	-1, 2, 2, 2, -1, -1, -1, -1, -1, -1;
+			//mykernel = mykernel / 8.0;
+
+			//cv::filter2D(imgFrameInput, imgFrameSrc, -1, mykernel);
+
 		}
 
 		//Create a watermark
