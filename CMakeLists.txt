@@ -2,15 +2,8 @@ cmake_minimum_required(VERSION 2.8.9)
 project (LNWaterMark)
 
 #Bring the headers, such as Student.h into the project
-include_directories(/home/atish/Downloads/opencv-3.2.0/modules/core/include)
-include_directories(/home/atish/Downloads/opencv-3.2.0/build)
-include_directories(/home/atish/Downloads/opencv-3.2.0/modules/highgui/include)
-include_directories(/home/atish/Downloads/opencv-3.2.0/modules/imgcodecs/include)
-include_directories(/home/atish/Downloads/opencv-3.2.0/modules/videoio/include)
-include_directories(/home/atish/Downloads/opencv-3.2.0/modules/imgproc/include)
-include_directories(/home/atish/Downloads/ImageMagick-7.0.4-4/Magick++/lib)
-include_directories(/home/atish/Downloads/ImageMagick-7.0.4-4)
- 
+include_directories(/usr/local/include/ImageMagick-7) 
+
 #the file(GLOB...) allows for wildcard additions:
 file(GLOB SOURCES "LectureNotesWaterMark/*.cpp")
  
