@@ -4,9 +4,16 @@
 #include<opencv2/highgui/highgui.hpp>
 #include<opencv2/imgproc/imgproc.hpp>
 
-#include <fstream>
+#include<fstream>
 #include<iostream>
+#ifdef __linux__ 
+    //linux code goes here
+#elif _WIN32
+    // windows code goes here
 #include<conio.h>           // it may be necessary to change or remove this line if not using Windows
+#else
+#endif
+
 #include "Magick++.h"
 
 /// Global Variables
