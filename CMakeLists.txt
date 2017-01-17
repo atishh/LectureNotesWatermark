@@ -11,8 +11,6 @@ add_executable(LNWaterMark ${SOURCES})
 
 target_compile_options(LNWaterMark PRIVATE -std=c++11)
 
-link_directories(/home/atish/Downloads/opencv-3.2.0/build/lib)
-
 #file(GLOB MYLIBS "${BOOST_PATH}/libboost*.a")
 
 target_link_libraries(LNWaterMark PRIVATE opencv_core)
