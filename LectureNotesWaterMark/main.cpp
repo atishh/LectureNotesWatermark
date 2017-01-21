@@ -15,6 +15,7 @@
 #endif
 
 #include "Magick++.h"
+#include <time.h>
 
 /// Global Variables
 std::string sVideoPath;
@@ -31,30 +32,37 @@ bool bIsThumbNailWritten = false;
 const int nThumbNailWidth = 300;
 const int nThumbNailHeight = 200;
 const bool bEnableSharpening = true; //Aha moment
+const bool bShowImage = true;
 
-int main(void)
+int main(int argc, char* argv[])
 {
-	sVideoPath = "../../g1USSZVWDsY";
+	clock_t tStart = clock();
+
+	assert(argc > 2);
+	sVideoPath = argv[1];
+	sTitle = argv[2];
+	//sVideoPath = "../../g1USSZVWDsY";
 	//sVideoPath = "../../Lecture14";
 	std::ifstream inFile(sVideoPath + "_frame.list");
 	std::string sFrameName;
 
 	cv::namedWindow(window_name, CV_WINDOW_AUTOSIZE);
 
-	std::string finalImageStr = "../../tmpP/finalImage.pdf";
+	//For reading pdf file directly. May be required for some testing
+	//std::string finalImageStr = "../../tmpP/finalImage.pdf";
 	//std::list<Magick::Image> imageList;
-
 	//Magick::readImages(&imageList, finalImageStr);
 
 	std::list<Magick::Image> imageListW;
+	std::string finalImageStrI2 = "/tmp/" + sVideoPath + ".jpg";
 
-	std::string finalImageStrI2 = "../../tmpW/intermedia2.jpg";
 	while(inFile >> sFrameName) {
 		std::cout << sFrameName;
 		std::cout << "Writing intermediate image\n";
-		sFrameName = "../" + sFrameName; //This line is just temporary.
 		cv::Mat imgFrameSrc = cv::imread(sFrameName);
-		cv::imshow("origImage", imgFrameSrc);
+		if(imgFrameSrc.data == NULL)
+			continue;
+		if(bShowImage) cv::imshow("origImage", imgFrameSrc);
 
 		//Sharpen image
 		if (bEnableSharpening) {
@@ -78,34 +86,67 @@ int main(void)
 			imgFrameSrc.cols, imgFrameSrc.type());
 		textPointX = (int)(imgFrameWM.cols/2);
 		textPointY = (int)(imgFrameWM.rows - 200);
-		cv::putText(imgFrameWM, sWaterMark,
-			cv::Point(textPointX, textPointY), intFontFace, 2,
-			cv::Scalar(255, 255, 255), 8);
-		cv::imshow("watermark", imgFrameWM);
+		//Font Size = 2 , thickness = 8
+		//Font Size = 1.5 , thickness = 6
+		if(imgFrameSrc.cols < 1000) {
+			cv::putText(imgFrameWM, sWaterMark,
+				cv::Point(textPointX, textPointY), intFontFace, 1.5,
+				cv::Scalar(255, 255, 255), 6);
+		}
+		else {
+			cv::putText(imgFrameWM, sWaterMark,
+				cv::Point(textPointX, textPointY), intFontFace, 2,
+				cv::Scalar(255, 255, 255), 8);
+		}
+		if(bShowImage) cv::imshow("watermark", imgFrameWM);
 
-		//Blend watermark to original.
+		//Create a source2 same as source1		
+		cv::Mat imgFrameSrc2 = imgFrameSrc.clone();
+
+		//Create a temporary black and white image just to find intensity
+		cv::Mat imgFrameSrcBW = imgFrameSrc.clone();
+		cv::cvtColor(imgFrameSrcBW, imgFrameSrcBW, CV_BGR2GRAY);
+
+		//Blend watermark to source2.
 		for (int i = 0; i < imgFrameWM.rows; i++) {
 			for (int j = 0; j < imgFrameWM.cols; j++) {
 				cv::Vec3b intensity2 = imgFrameWM.at<cv::Vec3b>(i, j);
 				double intensity = intensity2.val[0];
 				if (intensity == 255) {
+
+					cv::Scalar intensity2 = imgFrameSrcBW.at<uchar>(i, j);
+					double intensity3 = intensity2.val[0];
+					if (intensity3 > 127) {
+						imgFrameSrc2.at<cv::Vec3b>(i,j) = cv::Vec3b(0,0,0);
+					}
+					else {
+						imgFrameSrc2.at<cv::Vec3b>(i,j) = cv::Vec3b(255,255,255);
+					}
+
+					/*
 					cv::Vec3b intensitySrc = imgFrameSrc.at<cv::Vec3b>(i, j);
 					if(intensitySrc.val[0] >= 5)
-						imgFrameSrc.at<cv::Vec3b>(i, j)[0] = intensitySrc.val[0] - 5;
+						imgFrameSrc.at<cv::Vec3b>(i, j)[0] = intensitySrc.val[0] - 15;
 					else 
-						imgFrameSrc.at<cv::Vec3b>(i, j)[0] = intensitySrc.val[0] + 5;
+						imgFrameSrc.at<cv::Vec3b>(i, j)[0] = intensitySrc.val[0] + 15;
 					if(intensitySrc.val[1] >= 5)
-						imgFrameSrc.at<cv::Vec3b>(i, j)[1] = intensitySrc.val[1] - 5;
+						imgFrameSrc.at<cv::Vec3b>(i, j)[1] = intensitySrc.val[1] - 15;
 					else 
-						imgFrameSrc.at<cv::Vec3b>(i, j)[1] = intensitySrc.val[1] + 5;
+						imgFrameSrc.at<cv::Vec3b>(i, j)[1] = intensitySrc.val[1] + 15;
 					if(intensitySrc.val[2] >= 5)
-						imgFrameSrc.at<cv::Vec3b>(i, j)[2] = intensitySrc.val[2] - 5;
+						imgFrameSrc.at<cv::Vec3b>(i, j)[2] = intensitySrc.val[2] - 15;
 					else 
-						imgFrameSrc.at<cv::Vec3b>(i, j)[2] = intensitySrc.val[2] + 5;
+						imgFrameSrc.at<cv::Vec3b>(i, j)[2] = intensitySrc.val[2] + 15;
+					*/
 				}
 			}
 		}
-		cv::imshow("After Blending", imgFrameSrc);
+
+		if(bShowImage) cv::imshow("After Watermark", imgFrameSrc2);
+		//Blend source1 and source2
+	    cv::addWeighted(imgFrameSrc, 0.9, imgFrameSrc2, 0.1, 0, imgFrameSrc);
+
+		if(bShowImage) cv::imshow("After Blending", imgFrameSrc);
 
 
 		//Make top and bottom BORDER
@@ -128,7 +169,7 @@ int main(void)
 		//Put Page number Text.
 		textPointX = (int)(imgFrameDes.cols-100); 
 		textPointY = (int)(30);
-		std::string sPageNo = "page " + std::to_string(nPageNo);
+		std::string sPageNo = std::to_string(nPageNo);
 		cv::putText(imgFrameDes, sPageNo,
 			cv::Point(textPointX, textPointY), intFontFace, 0.5, 
 			cv::Scalar(0, 0, 0), 1);
@@ -140,7 +181,7 @@ int main(void)
 			cv::Point(textPointX, textPointY), intFontFace, 0.5,
 			cv::Scalar(0, 0, 0), 1);
 
-		cv::imshow(window_name, imgFrameDes);
+		if(bShowImage) cv::imshow(window_name, imgFrameDes);
 
 		//Write final image with some compression
 		std::vector<int> params;
@@ -156,7 +197,7 @@ int main(void)
 			cv::Mat imgFrameTN = cv::Mat::zeros(nThumbNailHeight, 
 				nThumbNailWidth, imgFrameDes.type());
 			resize(imgFrameDes, imgFrameTN, imgFrameTN.size());
-			cv::imshow("thumbnail", imgFrameTN);
+			if(bShowImage) cv::imshow("thumbnail", imgFrameTN);
 			cv::imwrite(sThumbNail, imgFrameTN, params);
 			bIsThumbNailWritten = true;
 		}
@@ -166,11 +207,14 @@ int main(void)
 		nPageNo++;
 	}
 
-	std::string finalImageStrF = "../../tmpP/FinalImageF.pdf";
+	std::string finalImageStrF = sVideoPath + "N.pdf";
 	Magick::writeImages(imageListW.begin(), imageListW.end(), finalImageStrF);
 
 	inFile.close();
-	cv::waitKey(0);
+
+	printf("Time taken: %.2fs\n", (double)(clock() - tStart) / CLOCKS_PER_SEC);
+	
+	if(bShowImage) cv::waitKey(0);
 
 	return 0;
 }
