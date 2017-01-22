@@ -24,6 +24,7 @@ char* window_name = "copyMakeBorder Demo";
 std::string sCopyRight = "created by domainname.com";
 std::string sWaterMark = "domainname.com";
 std::string sTitle = "Gravity & Lights: Lecture 2: Hyperplane";
+std::string sChapter = "Lecture 20";
 int intFontFace = CV_FONT_HERSHEY_SIMPLEX;
 int textPointX;
 int textPointY;
@@ -38,9 +39,10 @@ int main(int argc, char* argv[])
 {
 	clock_t tStart = clock();
 
-	assert(argc > 2);
+	assert(argc > 3);
 	sVideoPath = argv[1];
 	sTitle = argv[2];
+	sChapter = argv[3];
 	//sVideoPath = "../../g1USSZVWDsY";
 	//sVideoPath = "../../Lecture14";
 	std::ifstream inFile(sVideoPath + "_frame.list");
@@ -152,7 +154,7 @@ int main(int argc, char* argv[])
 		//Make top and bottom BORDER
 		int top, bottom, left, right;
 		/// Initialize arguments for the filter
-		top = 50; bottom = 50;
+		top = 70; bottom = 50;
 		left = 0; right = 0;
 		cv::Mat imgFrameDes = imgFrameSrc;
 		cv::Scalar value = cv::Scalar(255, 255, 255);
@@ -163,6 +165,13 @@ int main(int argc, char* argv[])
 		textPointX = (int)(30);
 		textPointY = (int)(30);
 		cv::putText(imgFrameDes, sTitle,
+			cv::Point(textPointX, textPointY), intFontFace, 0.5,
+			cv::Scalar(0, 0, 0), 1);
+
+		//Put Chapter Text.
+		textPointX = (int)(30);
+		textPointY = (int)(50);
+		cv::putText(imgFrameDes, sChapter,
 			cv::Point(textPointX, textPointY), intFontFace, 0.5,
 			cv::Scalar(0, 0, 0), 1);
 
