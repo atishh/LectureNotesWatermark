@@ -1,6 +1,7 @@
 //copyRights Atish Kumar Singh
 
 #include<opencv2/core/core.hpp>
+#include<opencv2/objdetect/objdetect.hpp>
 #include<opencv2/highgui/highgui.hpp>
 #include<opencv2/imgproc/imgproc.hpp>
 
@@ -35,6 +36,15 @@ const int nThumbNailHeight = 200;
 const bool bEnableSharpening = true; //Aha moment
 const bool bShowImage = true;
 
+//haarcascade
+std::string face_cascade_name = "/home/atish/Downloads/opencv-3.2.0/data/haarcascades/haarcascade_frontalface_alt.xml";
+std::string eyes_cascade_name = "/home/atish/Downloads/opencv-3.2.0/data/haarcascades/haarcascade_eye_tree_eyeglasses.xml";
+cv::CascadeClassifier face_cascade;
+cv::CascadeClassifier eyes_cascade;
+std::string window_name2 = "Capture - Face detection";
+cv::RNG rng(12345);
+void detectAndDisplay( cv::Mat frame );
+
 int main(int argc, char* argv[])
 {
 	clock_t tStart = clock();
@@ -58,6 +68,10 @@ int main(int argc, char* argv[])
 	std::list<Magick::Image> imageListW;
 	std::string finalImageStrI2 = "/tmp/" + sVideoPath + ".jpg";
 
+   //-- 1. Load the cascades
+   if( !face_cascade.load( face_cascade_name ) ){ printf("--(!)Error loading\n"); return -1; };
+   if( !eyes_cascade.load( eyes_cascade_name ) ){ printf("--(!)Error loading\n"); return -1; };
+
 	while(inFile >> sFrameName) {
 		std::cout << sFrameName;
 		std::cout << "Writing intermediate image\n";
@@ -66,6 +80,8 @@ int main(int argc, char* argv[])
 			continue;
 		if(bShowImage) cv::imshow("origImage", imgFrameSrc);
 
+		cv::Mat imgHuman = imgFrameSrc.clone();
+		detectAndDisplay(imgHuman);
 		//Sharpen image
 		if (bEnableSharpening) {
 			cv::Mat imgFrameInput = imgFrameSrc.clone();
@@ -214,6 +230,7 @@ int main(int argc, char* argv[])
 		Magick::readImages(&imageListW, finalImageStrI2);
 
 		nPageNo++;
+		cv::waitKey(0);
 	}
 
 	std::string finalImageStrF = sVideoPath + "N.pdf";
@@ -227,3 +244,37 @@ int main(int argc, char* argv[])
 
 	return 0;
 }
+
+void detectAndDisplay( cv::Mat frame )
+{
+	std::vector<cv::Rect> faces;
+	cv::Mat frame_gray;
+
+	cvtColor( frame, frame_gray, CV_BGR2GRAY );
+	equalizeHist( frame_gray, frame_gray );
+
+	//-- Detect faces
+	face_cascade.detectMultiScale( frame_gray, faces, 1.1, 2, 0|CV_HAAR_SCALE_IMAGE, cv::Size(30, 30) );
+
+	for( size_t i = 0; i < faces.size(); i++ )
+	{
+		cv::Point center( faces[i].x + faces[i].width*0.5, faces[i].y + faces[i].height*0.5 );
+		ellipse( frame, center, cv::Size( faces[i].width*0.5, faces[i].height*0.5), 0, 0, 360, cv::Scalar( 255, 0, 255 ), 4, 8, 0 );
+
+		cv::Mat faceROI = frame_gray( faces[i] );
+		std::vector<cv::Rect> eyes;
+
+		//-- In each face, detect eyes
+		eyes_cascade.detectMultiScale( faceROI, eyes, 1.1, 2, 0 |CV_HAAR_SCALE_IMAGE, cv::Size(30, 30) );
+
+		for( size_t j = 0; j < eyes.size(); j++ )
+		{
+			cv::Point center( faces[i].x + eyes[j].x + eyes[j].width*0.5, faces[i].y + eyes[j].y + eyes[j].height*0.5 );
+			int radius = cvRound( (eyes[j].width + eyes[j].height)*0.25 );
+			circle( frame, center, radius, cv::Scalar( 255, 0, 0 ), 4, 8, 0 );
+		}
+	}
+	//-- Show what you got
+	cv::imshow( window_name2, frame );
+}
+

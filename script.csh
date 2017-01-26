@@ -15,3 +15,6 @@ while ( $j <= 60 )
   echo "Welcome $j times"
   @ j++
 end
+
+//To merge columns of 2 files
+paste info.list /tmp/youtube.list > /tmp/atish10
