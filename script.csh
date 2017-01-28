@@ -18,3 +18,27 @@ end
 
 //To merge columns of 2 files
 paste info.list /tmp/youtube.list > /tmp/atish10
+
+
+Description:
+<div class="home-columns clearfix">
+<div class="one-half">Lecture 1: Topology
+<iframe class="iframe-size" src="https://www.youtube.com/embed/VkV8xp-JFlA" width="300" height="150" frameborder="0" allowfullscreen="allowfullscreen"></iframe></div>
+<div class="one-half last">Lecture 2: Topological Manifolds
+<iframe width="560" height="315" src="https://www.youtube.com/embed/zWg7U0OEAoE" frameborder="0" allowfullscreen></iframe>
+</div>
+</div>
+<a href="http://localhost/lnsitenew/wp-content/uploads/2017/01/FinalImage525000.jpg" download="w3logo">
+<img src="http://localhost/lnsitenew/wp-content/uploads/2017/01/FinalImage525000.jpg" alt="W3Schools" width="104" height="142" border="0" />
+</a>
+<object data="myfile.pdf" type="http://localhost/lnsitenew/wp-content/uploads/2017/01/FinalImageF.pdf" width="100%" height="100%">
+  <p>Alternative text - include a link <a href="http://localhost/lnsitenew/wp-content/uploads/2017/01/FinalImageF.pdf">to the PDF!</a></p>
+</object>
+
+
+Excerpt:
+<div class="home-columns clearfix">
+<div class="one-half">Lecture 1: Topology</div>
+<div class="one-half last">Lecture 2: Topological Manifolds</div>
+</div>
+
