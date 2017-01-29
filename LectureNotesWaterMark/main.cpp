@@ -34,7 +34,7 @@ bool bIsThumbNailWritten = false;
 const int nThumbNailWidth = 300;
 const int nThumbNailHeight = 200;
 const bool bEnableSharpening = true; //Aha moment
-const bool bShowImage = true;
+const bool bShowImage = false;
 
 //haarcascade
 std::string face_cascade_name = "/home/atish/Downloads/opencv-3.2.0/data/haarcascades/haarcascade_frontalface_alt.xml";
@@ -43,12 +43,16 @@ cv::CascadeClassifier face_cascade;
 cv::CascadeClassifier eyes_cascade;
 std::string window_name2 = "Capture - Face detection";
 cv::RNG rng(12345);
-void detectAndDisplay( cv::Mat frame );
+bool detectAndDisplay( cv::Mat frame );
 
 int main(int argc, char* argv[])
 {
 	clock_t tStart = clock();
 
+	std::cout << "argc = " << argc << std::endl;
+    for(int i = 0; i < argc; i++) {
+	std::cout << argv[i] << std::endl;
+	}
 	assert(argc > 3);
 	sVideoPath = argv[1];
 	sTitle = argv[2];
@@ -58,7 +62,8 @@ int main(int argc, char* argv[])
 	std::ifstream inFile(sVideoPath + "_frame.list");
 	std::string sFrameName;
 
-	cv::namedWindow(window_name, CV_WINDOW_AUTOSIZE);
+
+	if(bShowImage) cv::namedWindow(window_name, CV_WINDOW_AUTOSIZE);
 
 	//For reading pdf file directly. May be required for some testing
 	//std::string finalImageStr = "../../tmpP/finalImage.pdf";
@@ -81,7 +86,28 @@ int main(int argc, char* argv[])
 		if(bShowImage) cv::imshow("origImage", imgFrameSrc);
 
 		cv::Mat imgHuman = imgFrameSrc.clone();
-		detectAndDisplay(imgHuman);
+//		if(detectAndDisplay(imgHuman)) {
+//			std::string sDestFile = "/tmp/Atish/" + sVideoPath + std::to_string(nPageNo);
+//			std::string sTempName1 = sVideoPath + std::to_string(nPageNo);
+//			std::string sTempName2 = "mod02lec10-mod02lec108";
+//			if(sTempName1 == sTempName2) {}
+//			else 
+//			{
+//				/*
+//    			std::ifstream  src(sFrameName, std::ios::binary);
+//    			std::ofstream  dst(sDestFile, std::ios::binary);
+//   				dst << src.rdbuf();
+//				*/
+//			    int result= rename(sFrameName.c_str() , sDestFile.c_str() );
+//			    if ( result == 0 )
+//			      std::cout << "File successfully renamed" << std::endl;
+//			    else
+//			      std::cout << "Error renaming file" << std::endl;
+//				
+//				continue;
+//			}
+//		}
+
 		//Sharpen image
 		if (bEnableSharpening) {
 			cv::Mat imgFrameInput = imgFrameSrc.clone();
@@ -230,7 +256,7 @@ int main(int argc, char* argv[])
 		Magick::readImages(&imageListW, finalImageStrI2);
 
 		nPageNo++;
-		cv::waitKey(0);
+		if(bShowImage) cv::waitKey(0);
 	}
 
 	std::string finalImageStrF = sVideoPath + "N.pdf";
@@ -245,7 +271,7 @@ int main(int argc, char* argv[])
 	return 0;
 }
 
-void detectAndDisplay( cv::Mat frame )
+bool detectAndDisplay( cv::Mat frame )
 {
 	std::vector<cv::Rect> faces;
 	cv::Mat frame_gray;
@@ -253,20 +279,35 @@ void detectAndDisplay( cv::Mat frame )
 	cvtColor( frame, frame_gray, CV_BGR2GRAY );
 	equalizeHist( frame_gray, frame_gray );
 
+	 
 	//-- Detect faces
 	face_cascade.detectMultiScale( frame_gray, faces, 1.1, 2, 0|CV_HAAR_SCALE_IMAGE, cv::Size(30, 30) );
 
+	int nNumOfFaces = faces.size();
+	if(nNumOfFaces != 1)
+		return false;
 	for( size_t i = 0; i < faces.size(); i++ )
 	{
 		cv::Point center( faces[i].x + faces[i].width*0.5, faces[i].y + faces[i].height*0.5 );
 		ellipse( frame, center, cv::Size( faces[i].width*0.5, faces[i].height*0.5), 0, 0, 360, cv::Scalar( 255, 0, 255 ), 4, 8, 0 );
-
+		std::cout << "width = " << faces[i].width << " height = " << faces[i].height << std::endl;  
+		std::cout << "x = " << faces[i].x << " y = " << faces[i].y << std::endl;
+		if(faces[i].width < 120)
+			return false;
+		if(faces[i].height < 120)
+			return false;
+		if(faces[i].x < 300)
+			return false;
+		if(faces[i].y > 300)
+			return false;
 		cv::Mat faceROI = frame_gray( faces[i] );
 		std::vector<cv::Rect> eyes;
 
 		//-- In each face, detect eyes
 		eyes_cascade.detectMultiScale( faceROI, eyes, 1.1, 2, 0 |CV_HAAR_SCALE_IMAGE, cv::Size(30, 30) );
-
+	//	if((eyes.size() != 1) && (eyes.size() != 2))
+	//		return false;
+			
 		for( size_t j = 0; j < eyes.size(); j++ )
 		{
 			cv::Point center( faces[i].x + eyes[j].x + eyes[j].width*0.5, faces[i].y + eyes[j].y + eyes[j].height*0.5 );
@@ -276,5 +317,6 @@ void detectAndDisplay( cv::Mat frame )
 	}
 	//-- Show what you got
 	cv::imshow( window_name2, frame );
+	return true;
 }
 
