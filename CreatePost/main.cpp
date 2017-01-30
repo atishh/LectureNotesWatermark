@@ -13,14 +13,34 @@ int main(int argc, char* argv[])
     for(int i = 0; i < argc; i++) {
 	std::cout << argv[i] << std::endl;
 	}
-	assert(argc > 4);
-	std::string sVideoPath = argv[1];
-	std::string sTitle = argv[2];
-	std::string sChapter = argv[3];
-	std::string sYoutube = argv[4];
+	assert(argc > 5);
+	std::string sVideoPath1 = "N.pdf";
+	std::string sVideoPath = argv[2] + sVideoPath1;
+	std::string sTitle = argv[3];
+	std::string sChapter = argv[4];
+	std::string sYoutube = argv[5];
+	std::string sDiv1 = argv[1];
+	std::string sDiv = "divId" + sDiv1;
 
 	std::ofstream outFile("post.txt", std::ios::app);
 
+	outFile << "<a href=\"javascript:displayVideoPdf('" ;
+	outFile << sDiv ;
+	outFile << "', '" ;
+	outFile << sYoutube ;
+	outFile << "', '" ;
+	outFile << "DigitalImageProcessingPKBiswas/" ;
+	outFile << sVideoPath ;
+	outFile << "');\">" ;
+	outFile << sChapter ;
+	outFile << "</a><br />" ;
+	outFile << "<div id=\"" ;
+	outFile << sDiv ;
+	outFile << "\" style=\"display: none;\"></div>" ;
+	outFile << std::endl;
+
+
+/*
 	outFile << "<div class=\"home-columns clearfix\">" << std::endl;
 	outFile << sChapter << std::endl;
 	outFile << "<div class=\"one-half\">" << std::endl;
@@ -43,10 +63,16 @@ int main(int argc, char* argv[])
 	outFile << "</ul></nav>" << std::endl;
 	outFile << "</div>" << std::endl;
 	outFile << "</div>" << std::endl;
+*/
+
 	outFile.close();
 	return 0;
 }
 
+/*
+<a href="javascript:displayVideoPdf('div5', 'DSGHkvQBMbs', 'DigitalImageProcessingPKBiswas/mod01lec01-mod01lec01N.pdf');">Lecture 01: Introduction to Digital Image Processing</a><br />
+<div id="div5" style="display: none;"></div>
+*/
 /*
 <div class="home-columns clearfix">
 Lecture 1: Topology
