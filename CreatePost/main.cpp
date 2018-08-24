@@ -13,12 +13,15 @@ int main(int argc, char* argv[])
     for(int i = 0; i < argc; i++) {
 	std::cout << argv[i] << std::endl;
 	}
-	assert(argc > 5);
+	assert(argc > 6);
 	std::string sVideoPath1 = "N.pdf";
-	std::string sVideoPath = argv[2] + sVideoPath1;
-	std::string sTitle = argv[3];
-	std::string sChapter = argv[4];
-	std::string sYoutube = argv[5];
+	std::string sVideoPath = argv[6] + sVideoPath1;
+	std::string sTitle = argv[2];
+	std::string sChapter = argv[3];
+	std::string sYoutube = argv[4];
+	std::string sCategory = argv[7];
+	std::string sCourse = argv[8];
+
 	std::string sDiv1 = argv[1];
 	std::string sDiv = "divId" + sDiv1;
 
@@ -29,7 +32,11 @@ int main(int argc, char* argv[])
 	outFile << "', '" ;
 	outFile << sYoutube ;
 	outFile << "', '" ;
-	outFile << "DigitalImageProcessingPKBiswas/" ;
+	outFile << sCategory ;
+	outFile << "/" ;
+	outFile << sCourse ;
+	outFile << "/" ;
+	outFile << "', '" ;
 	outFile << sVideoPath ;
 	outFile << "');\">" ;
 	outFile << sChapter ;

@@ -1,10 +1,12 @@
 #!/bin/csh
+grep download_mp4 /tmp/atish1  | cut -d "\"" -f 2 | sed 's/^/wget https:\/\/nptel.ac.in/' | sed 's/https/\"https/' | sed 's/$/\"/' |& tee script.csh
 
 rm output.txt
 touch output.txt
 foreach file (`cat video.list`)
 	echo $file |& tee -a output.txt
 	/home/atish/projects/build/lecturenotes/LectureNote $file |& tee -a output.txt
+	sleep 20
 end
 
 rm -rf /tmp/youtube.list

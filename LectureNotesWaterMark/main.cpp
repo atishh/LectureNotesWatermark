@@ -22,8 +22,8 @@
 std::string sVideoPath;
 const int nImageCompressionPercent = 85;
 char* window_name = "copyMakeBorder Demo";
-std::string sCopyRight = "created by domainname.com";
-std::string sWaterMark = "domainname.com";
+std::string sCopyRight = "readlecture.com";
+std::string sWaterMark = "readlecture.com";
 std::string sTitle = "Gravity & Lights: Lecture 2: Hyperplane";
 std::string sChapter = "Lecture 20";
 int intFontFace = CV_FONT_HERSHEY_SIMPLEX;
@@ -37,8 +37,8 @@ const bool bEnableSharpening = true; //Aha moment
 const bool bShowImage = false;
 
 //haarcascade
-std::string face_cascade_name = "/home/atish/Downloads/opencv-3.2.0/data/haarcascades/haarcascade_frontalface_alt.xml";
-std::string eyes_cascade_name = "/home/atish/Downloads/opencv-3.2.0/data/haarcascades/haarcascade_eye_tree_eyeglasses.xml";
+std::string face_cascade_name = "/home/atish/projects/opencv/data/haarcascades/haarcascade_frontalface_alt.xml";
+std::string eyes_cascade_name = "/home/atish/projects/opencv/data/haarcascades/haarcascade_eye_tree_eyeglasses.xml";
 cv::CascadeClassifier face_cascade;
 cv::CascadeClassifier eyes_cascade;
 std::string window_name2 = "Capture - Face detection";
@@ -53,8 +53,8 @@ int main(int argc, char* argv[])
     for(int i = 0; i < argc; i++) {
 	std::cout << argv[i] << std::endl;
 	}
-	assert(argc > 3);
-	sVideoPath = argv[1];
+	assert(argc > 6);
+	sVideoPath = argv[6];
 	sTitle = argv[2];
 	sChapter = argv[3];
 	//sVideoPath = "../../g1USSZVWDsY";
@@ -83,6 +83,7 @@ int main(int argc, char* argv[])
 		cv::Mat imgFrameSrc = cv::imread(sFrameName);
 		if(imgFrameSrc.data == NULL)
 			continue;
+		std::cout << "Reading correct\n";
 		if(bShowImage) cv::imshow("origImage", imgFrameSrc);
 
 		cv::Mat imgHuman = imgFrameSrc.clone();
@@ -132,7 +133,15 @@ int main(int argc, char* argv[])
 		textPointY = (int)(imgFrameWM.rows - 200);
 		//Font Size = 2 , thickness = 8
 		//Font Size = 1.5 , thickness = 6
-		if(imgFrameSrc.cols < 1000) {
+		std::cout << "cols =" << imgFrameSrc.cols <<"\n";
+		if(imgFrameSrc.cols < 600) {
+			textPointX = (int)(imgFrameWM.cols/2);
+			textPointY = (int)(imgFrameWM.rows - 100);
+			cv::putText(imgFrameWM, sWaterMark,
+				cv::Point(textPointX, textPointY), intFontFace, 0.7,
+				cv::Scalar(255, 255, 255), 4);
+		}
+		else if(imgFrameSrc.cols < 1000) {
 			cv::putText(imgFrameWM, sWaterMark,
 				cv::Point(textPointX, textPointY), intFontFace, 1.5,
 				cv::Scalar(255, 255, 255), 6);
@@ -196,41 +205,81 @@ int main(int argc, char* argv[])
 		//Make top and bottom BORDER
 		int top, bottom, left, right;
 		/// Initialize arguments for the filter
-		top = 70; bottom = 50;
-		left = 0; right = 0;
+		if(imgFrameSrc.cols < 600) {
+			top = 30; bottom = 20;
+			left = 0; right = 0;
+		}
+		else
+		{
+			top = 70; bottom = 50;
+			left = 0; right = 0;
+		}
 		cv::Mat imgFrameDes = imgFrameSrc;
 		cv::Scalar value = cv::Scalar(255, 255, 255);
 		int borderType = cv::BORDER_CONSTANT;
 		cv::copyMakeBorder(imgFrameSrc, imgFrameDes, top, bottom, left, right, borderType, value);
 		
-		//Put Introduction Text.
-		textPointX = (int)(30);
-		textPointY = (int)(30);
-		cv::putText(imgFrameDes, sTitle,
-			cv::Point(textPointX, textPointY), intFontFace, 0.5,
-			cv::Scalar(0, 0, 0), 1);
-
-		//Put Chapter Text.
-		textPointX = (int)(30);
-		textPointY = (int)(50);
-		cv::putText(imgFrameDes, sChapter,
-			cv::Point(textPointX, textPointY), intFontFace, 0.5,
-			cv::Scalar(0, 0, 0), 1);
-
-		//Put Page number Text.
-		textPointX = (int)(imgFrameDes.cols-100); 
-		textPointY = (int)(30);
-		std::string sPageNo = std::to_string(nPageNo);
-		cv::putText(imgFrameDes, sPageNo,
-			cv::Point(textPointX, textPointY), intFontFace, 0.5, 
-			cv::Scalar(0, 0, 0), 1);
-
-		//Put Copy Right Text.
-		textPointX = (int)(imgFrameDes.cols - 300);
-		textPointY = (int)(imgFrameDes.rows - 20);
-		cv::putText(imgFrameDes, sCopyRight,
-			cv::Point(textPointX, textPointY), intFontFace, 0.5,
-			cv::Scalar(0, 0, 0), 1);
+		
+		if(imgFrameSrc.cols < 600) {
+			//Put Introduction Text.
+			textPointX = (int)(10);
+			textPointY = (int)(10);
+			cv::putText(imgFrameDes, sTitle,
+				cv::Point(textPointX, textPointY), intFontFace, 0.3,
+				cv::Scalar(0, 0, 0), 0.7);
+		
+			//Put Chapter Text.
+			textPointX = (int)(10);
+			textPointY = (int)(20);
+			cv::putText(imgFrameDes, sChapter,
+				cv::Point(textPointX, textPointY), intFontFace, 0.3,
+				cv::Scalar(0, 0, 0), 0.7);
+		
+			//Put Page number Text.
+			textPointX = (int)(imgFrameDes.cols-30); 
+			textPointY = (int)(10);
+			std::string sPageNo = std::to_string(nPageNo);
+			cv::putText(imgFrameDes, sPageNo,
+				cv::Point(textPointX, textPointY), intFontFace, 0.3, 
+				cv::Scalar(0, 0, 0), 0.7);
+		
+			//Put Copy Right Text.
+			textPointX = (int)(imgFrameDes.cols - 100);
+			textPointY = (int)(imgFrameDes.rows - 10);
+			cv::putText(imgFrameDes, sCopyRight,
+				cv::Point(textPointX, textPointY), intFontFace, 0.3,
+				cv::Scalar(0, 0, 0), 0.7);
+		}
+		else {
+			//Put Introduction Text.
+			textPointX = (int)(30);
+			textPointY = (int)(30);
+			cv::putText(imgFrameDes, sTitle,
+				cv::Point(textPointX, textPointY), intFontFace, 0.5,
+				cv::Scalar(0, 0, 0), 1);
+		
+			//Put Chapter Text.
+			textPointX = (int)(30);
+			textPointY = (int)(50);
+			cv::putText(imgFrameDes, sChapter,
+				cv::Point(textPointX, textPointY), intFontFace, 0.5,
+				cv::Scalar(0, 0, 0), 1);
+		
+			//Put Page number Text.
+			textPointX = (int)(imgFrameDes.cols-100); 
+			textPointY = (int)(30);
+			std::string sPageNo = std::to_string(nPageNo);
+			cv::putText(imgFrameDes, sPageNo,
+				cv::Point(textPointX, textPointY), intFontFace, 0.5, 
+				cv::Scalar(0, 0, 0), 1);
+		
+			//Put Copy Right Text.
+			textPointX = (int)(imgFrameDes.cols - 300);
+			textPointY = (int)(imgFrameDes.rows - 20);
+			cv::putText(imgFrameDes, sCopyRight,
+				cv::Point(textPointX, textPointY), intFontFace, 0.5,
+				cv::Scalar(0, 0, 0), 1);
+		}
 
 		if(bShowImage) cv::imshow(window_name, imgFrameDes);
 
